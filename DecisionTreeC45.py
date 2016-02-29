@@ -6,18 +6,20 @@ import os
 
 def I(counts):
         i = 0
-        T = sum(counts)
+        total = sum(counts)
         for c in counts:
-            i += -(c/T)*np.log2(c/T)
+            if c:
+                i += -(c/total)*np.log2(c/total)
+            else:
+                i += 0
         return(i)
-    
-
 
 class DecisionTree(object):
     
     #Instances of DecisionTree objects must initialize with a pointer to a pandas dataframe
     def __init__(self, df):
         self.df = df
+        self.isfit = False
     
     #main method for DecisionTree fitting, with optional parameters
     def fit(self, yname, Xnames, Xnum = None, loss = "C4.5", minleaves = 1, maxdepth = None):
@@ -51,9 +53,10 @@ class DecisionTree(object):
             
             node_i = self.queue.popleft()
             
-            if len(node_i.Xnames) == 0 or any([v == 0 for v in node_i.yc_i.values()]):
-                print('breaking')
-                print(node_i.pathkeys, node_i.yc_i)
+            if node_i.parent != 'root':
+                self.nodes[node_i.parent].children.append(self.nid)
+            
+            if len(node_i.Xnames) == 0 or len([v for v in node_i.yc_i.values() if v > 0]) < 2:
                 node_i.isleaf = True
                 node_i.decision = max(node_i.yc_i.items(), key = lambda x: x[1])[0]
                 self.nodes[self.nid] = node_i
@@ -62,40 +65,47 @@ class DecisionTree(object):
             
             Info_y = I(node_i.yc_i.values())
             
-            #print(node_i.Xnames)
+            ct = self.ContingencyTable(node_i.pathkeys, node_i.Xnames)
             
-            ct = self.ContinGENcyTable(node_i.pathkeys, node_i.Xnames)
             maxgain = 0
             
             T = sum(node_i.yc_i.values())
+            
             for c in ct:
-                print(c)
+
                 Info_yx = np.sum(np.multiply(
                         np.apply_along_axis(I, 1, c[1]),
                         np.apply_along_axis(np.sum, 1, c[1]) / T
                         ))
                 Gain_x = Info_y - Info_yx
-                if Gain_x >= maxgain:
-                    self.chosen = c
+                if Gain_x > maxgain:
+                    chosen = c
                     maxgain = Gain_x
-            #print((self.chosen, maxgain))
-            node_i.opt = self.chosen[0]
-            print(node_i.opt)
-            node_i.levels = self.chosen[2]
-            Xnew = [x for x in node_i.Xnames if x != self.chosen[0]]
-            print(Xnew)
+            
+            if maxgain == 0:
+                node_i.isleaf = True
+                node_i.decision = max(node_i.yc_i.items(), key = lambda x: x[1])[0]
+                self.nodes[self.nid] = node_i
+                self.nid += 1
+                continue
+
+            node_i.opt = chosen[0]
+
+            node_i.levels = chosen[2]
+            Xnew = [x for x in node_i.Xnames if x != chosen[0]]
+
             for i in range(len(node_i.levels)):
-                path = list(node_i.pathkeys) + [(self.chosen[0],'=',self.chosen[2][i])]
+                path = list(node_i.pathkeys) + [(chosen[0],'=',chosen[2][i])]
                 ycci = {}
                 for j, key in enumerate(self.ygroup):
-                    ycci[key] = self.chosen[1][i][j]
+                    ycci[key] = chosen[1][i][j]
                 self.queue.append(Node(path, Xnew, ycci, self.nid))
             self.nodes[self.nid] = node_i
             self.nid += 1
-                
-    
-    
-    def ContinGENcyTable(self, pathkeys, X):
+        
+        self.isfit = True
+        
+    def ContingencyTable(self, pathkeys, X):
         df_i = self.df
         for p in pathkeys:
             df_i = df_i.loc[df_i[p[0]] == p[2]]
@@ -108,36 +118,69 @@ class DecisionTree(object):
                     A[i][j] = np.sum(np.in1d(xgroup[xc],self.ygroup[yc],assume_unique=True))
             yield (x, A, levels)
             
+    def autoprune(self):
+        if not self.isfit:
+            print("ERROR: NO TREE TO AUTOPRUNE")
+            return(None)
+        for key in reversed(list(self.nodes.keys())):
+            if not self.nodes[key].isleaf:
+                dlist = [self.nodes[ckey].decision for ckey in self.nodes[key].children]
+                dset = set(dlist)
+                if len(dset) == 1 and dset != {None}:
+                    self.nodes[key].isleaf = True
+                    self.nodes[key].decision = dlist[0]
+                    for ckey in self.nodes[key].children:
+                        del self.nodes[ckey]
+                    self.nodes[key].children = None
+        
+    
     def D3tree(self, filename, openpage=True):
-        hier = {}
-        for key in self.nodes:
-            if self.nodes[key].isleaf:
-                parent = self.nodes[key].decision
-                hier[key] = {'name': parent, 'children': None}
-            else:
-                parent = self.nodes[key].opt
-                d = [nid for nid, n in self.nodes.items() if n.parent == key]
-                hier[key] = {'name': parent, 'children': d}
-        higherkeys = list(hier.keys())
-        higherkeys.reverse()
-        for key in higherkeys:
-            newlist = []
-            if hier[key]['children']:
-                for bbk in hier[key]['children']:
-                    newlist.append(hier[bbk])
-                    hier[key]['children'] = newlist
-            else:
-                del hier[key]['children']
-        htmlf = 'TreeDiagrambase.html'
-        red = open(htmlf, 'r').read()
-        s = red % str(hier[0])
+        if not self.isfit:
+            print("ERROR: NO TREE TO CHART")
+            return(None)
+        js = self.Nodes2JS()
+        treebase = open('TreeDiagrambase.html', 'r')
+        red = treebase.read()
+        s = red % str(js)
         htmlf = open(filename, 'w')
         htmlf.write(s)
+        treebase.close()
         htmlf.close()
         if openpage:
             webbrowser.open_new_tab('file://'+os.getcwd()+'/'+filename)
     
-
+    def Nodes2JS(self):
+        hier = {}
+        for key in self.nodes:
+            if self.nodes[key].isleaf:
+                cat = ''
+                if self.nodes[key].pathkeys:
+                    cat = self.nodes[key].pathkeys[-1][-1]
+                hier[key] = {'name': self.nodes[key].decision,
+                             'counts' : ((str(self.nodes[key].yc_i)).replace('{','')).replace('}',''),
+                             'category': cat,
+                             'leaf': 'true',
+                             'children': None}
+            else:
+                cat = ''
+                if self.nodes[key].pathkeys:
+                    cat = self.nodes[key].pathkeys[-1][-1]
+                hier[key] = {'name': self.nodes[key].opt,
+                             'counts' : ((str(self.nodes[key].yc_i)).replace('{','')).replace('}',''),
+                             'category': cat,
+                             'leaf': 'false',
+                             'children': self.nodes[key].children}
+        for key in reversed(list(hier.keys())):
+            newlist = []
+            if hier[key]['children']:
+                for bbk in hier[key]['children']:
+                    newlist.append(hier[bbk])
+                    del hier[bbk]
+                hier[key]['children'] = newlist
+            else:
+                del hier[key]['children']
+        return(hier[0])
+        
             
             
             
@@ -153,5 +196,6 @@ class Node(object):
         self.opt = None
         self.levels = None
         self.parent = parent
+        self.children = []
     
         

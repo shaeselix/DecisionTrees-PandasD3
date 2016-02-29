@@ -3,9 +3,7 @@
     <head>
         <meta charset="utf-8">
         <title>D3 Decision Tree</title>
-		<!--<script src="https://code.jquery.com/jquery-latest.min.js"></script>-->
         <script src="http://d3js.org/d3.v3.min.js" charset="utf-8"></script>
-		<!--<script type="text/javascript" src="wordlist.js"></script>-->
 		<style type="text/css">
 		    .node {
 		        cursor: pointer;
@@ -41,14 +39,14 @@ var margin = {
 width = 960 - margin.right - margin.left,
 height = 800 - margin.top - margin.bottom;
 
-var root = {'children': [{'children': [{'children': [{'name': 'Yes'}], 'name': 'MFT'}, {'children': [{'name': 'Yes'}, {'name': 'Yes'}], 'name': 'MFT'}], 'name': 'LCSW'}, {'children': [{'children': [{'name': 'Yes'}, {'name': 'Yes'}], 'name': 'MFT'}, {'children': [{'name': 'Yes'}, {'name': 'Yes'}], 'name': 'MFT'}], 'name': 'LCSW'}], 'name': 'Psychologist'};
+var root = {'name': 'Military Culture', 'leaf': 'false', 'category': '', 'children': [{'name': 'LPC', 'leaf': 'false', 'category': 'Not yet, but I would like to work with the military community', 'children': [{'name': 'Psychologist', 'leaf': 'false', 'category': 'Yes', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 5, 'No': 0"}, {'name': 'LCSW', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'Psychiatrist', 'leaf': 'false', 'category': 'Yes', 'children': [{'name': 'Psychiatric Nurse Practitioner', 'leaf': 'false', 'category': 'Yes', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 1, 'No': 0"}, {'name': 'Yes', 'leaf': 'true', 'category': 'No', 'counts': "'Yes': 1, 'No': 1"}], 'counts': "'Yes': 2, 'No': 1"}, {'name': 'Yes', 'leaf': 'true', 'category': 'No', 'counts': "'Yes': 8, 'No': 0"}], 'counts': "'Yes': 10, 'No': 1"}, {'name': 'Psychiatrist', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 4, 'No': 0"}, {'name': 'LMSW', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 2, 'No': 0"}, {'name': 'Yes', 'leaf': 'true', 'category': 'No', 'counts': "'Yes': 127, 'No': 35"}], 'counts': "'Yes': 129, 'No': 35"}], 'counts': "'Yes': 133, 'No': 35"}], 'counts': "'Yes': 143, 'No': 36"}], 'counts': "'Yes': 148, 'No': 36"}, {'name': 'Psychologist', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'LCSW', 'leaf': 'false', 'category': 'Yes', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 5, 'No': 0"}, {'name': 'MFT', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 3, 'No': 0"}, {'name': 'Yes', 'leaf': 'true', 'category': 'No', 'counts': "'Yes': 9, 'No': 2"}], 'counts': "'Yes': 12, 'No': 2"}], 'counts': "'Yes': 17, 'No': 2"}, {'name': 'LCSW', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'Psychiatric Nurse Practitioner', 'leaf': 'false', 'category': 'Yes', 'children': [{'name': 'No', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 0, 'No': 1"}, {'name': 'LMSW', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 2, 'No': 0"}, {'name': 'Psychiatrist', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 1, 'No': 0"}, {'name': 'MFT', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 1, 'No': 1"}, {'name': 'Yes', 'leaf': 'true', 'category': 'No', 'counts': "'Yes': 16, 'No': 6"}], 'counts': "'Yes': 17, 'No': 7"}], 'counts': "'Yes': 18, 'No': 7"}], 'counts': "'Yes': 20, 'No': 7"}], 'counts': "'Yes': 20, 'No': 8"}, {'name': 'MFT', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 7, 'No': 1"}, {'name': 'PLPC', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'Psychiatrist', 'leaf': 'false', 'category': 'Yes', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 1, 'No': 0"}, {'name': 'Yes', 'leaf': 'true', 'category': 'No', 'counts': "'Yes': 2, 'No': 1"}], 'counts': "'Yes': 3, 'No': 1"}, {'name': 'Psychiatrist', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 1, 'No': 0"}, {'name': 'LMSW', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'No', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 0, 'No': 2"}, {'name': 'No', 'leaf': 'true', 'category': 'No', 'counts': "'Yes': 1, 'No': 32"}], 'counts': "'Yes': 1, 'No': 34"}], 'counts': "'Yes': 2, 'No': 34"}], 'counts': "'Yes': 5, 'No': 35"}], 'counts': "'Yes': 12, 'No': 36"}], 'counts': "'Yes': 32, 'No': 44"}], 'counts': "'Yes': 49, 'No': 46"}], 'counts': "'Yes': 197, 'No': 82"}, {'name': 'Psychologist', 'leaf': 'false', 'category': 'Yes, I have served in the military', 'children': [{'name': 'No', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 0, 'No': 1"}, {'name': 'LCSW', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 2, 'No': 0"}, {'name': 'PLPC', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 2, 'No': 0"}, {'name': 'Yes', 'leaf': 'true', 'category': 'No', 'counts': "'Yes': 6, 'No': 2"}], 'counts': "'Yes': 8, 'No': 2"}], 'counts': "'Yes': 10, 'No': 2"}], 'counts': "'Yes': 10, 'No': 3"}, {'name': 'MFT', 'leaf': 'false', 'category': 'Yes, I have training in military culture', 'children': [{'name': 'No', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 0, 'No': 1"}, {'name': 'LCSW', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 9, 'No': 0"}, {'name': 'Psychologist', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 5, 'No': 0"}, {'name': 'PLPC', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 2, 'No': 0"}, {'name': 'Psychiatrist', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 1, 'No': 0"}, {'name': 'LPC', 'leaf': 'false', 'category': 'No', 'children': [{'name': 'Yes', 'leaf': 'true', 'category': 'Yes', 'counts': "'Yes': 37, 'No': 3"}, {'name': 'Yes', 'leaf': 'true', 'category': 'No', 'counts': "'Yes': 28, 'No': 2"}], 'counts': "'Yes': 65, 'No': 5"}], 'counts': "'Yes': 66, 'No': 5"}], 'counts': "'Yes': 68, 'No': 5"}], 'counts': "'Yes': 73, 'No': 5"}], 'counts': "'Yes': 82, 'No': 5"}], 'counts': "'Yes': 82, 'No': 6"}], 'counts': "'Yes': 289, 'No': 91"};
 
 var i = 0,
     duration = 750,
-    rectW = 60,
+    rectW = 100,
     rectH = 30;
 	
-var tree = d3.layout.cluster().nodeSize([70, 40]);
+var tree = d3.layout.cluster().nodeSize([rectW + 5, rectH + 5]);
 var diagonal = d3.svg.diagonal()
     .projection(function(d) {
 	return [d.x + rectW / 2, d.y + rectH/2];
@@ -113,11 +111,29 @@ function update(source) {
 	
 	nodeEnter.append("text")
         .attr("x", rectW / 2)
-        .attr("y", rectH / 2)
+        .attr("y", 10)
         .attr("dy", ".35em")
         .attr("text-anchor", "middle")
         .text(function (d) {
         return d.name;
+    });
+    
+    nodeEnter.append("text")
+        .attr("x", rectW / 2)
+        .attr("y", 20)
+        .attr("dy", ".35em")
+        .attr("text-anchor", "middle")
+        .text(function (d) {
+        return d.counts;
+    });
+    
+    nodeEnter.append("text")
+        .attr("x", rectW / 2)
+        .attr("y", -20)
+        .attr("dy", ".35em")
+        .attr("text-anchor", "middle")
+        .text(function (d) {
+        return d.category;
     });
 	
 	var nodeUpdate = node.transition()
@@ -132,8 +148,17 @@ function update(source) {
         .attr("stroke", "black")
         .attr("stroke-width", 1)
         .style("fill", function (d) {
-        return d._children ? "lightsteelblue" : "#fff";
+        if (d._children) {
+            return "lightsteelblue";
+        } else {
+            if (d.leaf == 'true') {
+                return "lightgreen";
+            } else {
+                return "#fff";
+            }
+        }
     });
+
 	
 	nodeUpdate.select("text")
         .style("fill-opacity", 1);
